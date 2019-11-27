@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// ///-----------------------------------------------------------------
+// ///   Producer.cs
+// ///   Alvaro Muir, alvaro@coca-cola.com
+// ///   MDS Global Analytics
+// ///   11/25/2019
+// ///-----------------------------------------------------------------
+using System;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Web;
 using Amazon.Kinesis;
 using Amazon.Kinesis.Model;
-using CommandLine;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Azure.EventHubs;
 using Newtonsoft.Json;
 using Snowplow.Analytics.Exceptions;
 using Snowplow.Analytics.Json;
@@ -17,15 +22,35 @@ namespace TeleKinesisNet
 {
     public class Consumer
     {
-        
-        private static void ConsumeStream(string streamName, string region, bool enriched, int limit = 25, float interval = 1.0F, int maxRecords = 0)
+        private static EventHubClient eventHubClient;
+        private static Producer producer;
+        private static String partitionKey;
+
+        // Kinesis stream consumer. Requires a stream name and region. If the stream is 'snowplow enriched' that is
+        // notated by the enriched flag.
+        public static void ConsumeStream(string streamName, string region, bool enriched,
+            int limit = 25, float interval = 1.0F, int maxRecords = 0,
+            String _namespace = null, String path = null, String key = null, String secret = null)
         {
             if (limit < 2) { limit = 2; }
-            if (interval < .5) { interval = 0.5F; }
+            if (interval < 1) { interval = 1.0F; }
 
             var client = new AmazonKinesisClient();
-            PrintBanner(streamName, region, interval);
-            
+
+            if (_namespace != null)
+            {
+                producer = new Producer(_namespace, key, secret, path);
+                eventHubClient = producer.GetEventHubClient();
+                PrintBanner(streamName, region, interval, _namespace, path);
+
+                partitionKey = $"events-{DateTime.Now.ToString("yyyy-MM-dd-HH")}";
+            }
+            else
+            {
+                PrintBanner(streamName, region, interval);
+            }
+
+
             var streamRequest = new DescribeStreamRequest();
             streamRequest.StreamName = streamName;
 
@@ -35,7 +60,7 @@ namespace TeleKinesisNet
             iteratorRequest.StreamName = streamName;
             iteratorRequest.ShardId = shard.ShardId;
             iteratorRequest.ShardIteratorType = "LATEST";
-         
+
             var recordsRequest = new GetRecordsRequest();
             recordsRequest.ShardIterator = client.GetShardIteratorAsync(iteratorRequest).Result.ShardIterator;
             recordsRequest.Limit = limit;
@@ -61,8 +86,7 @@ namespace TeleKinesisNet
                         else
                         {
                             var record = recordStream.ToDictionary();
-                            
-                            
+
                             if (enriched)
                             {
                                 try
@@ -77,27 +101,32 @@ namespace TeleKinesisNet
                             else
                             {
                                 var payload = Deserialize<CollectorPayload>(recordStream.Data.ToArray()).ToDictionary();
-                                var body = HttpUtility.ParseQueryString(WebUtility.UrlDecode(payload["Body"].ToString()));
-                                payload["Body"] = body.AllKeys.ToDictionary(k => k, k => body[k]);
+                                var body = WebUtility.UrlDecode(payload["Body"].ToString());
+                                payload["Body"] = QueryHelpers.ParseQuery(body);
                                 record["Data"] = payload;
                             }
-                            Console.WriteLine(JsonConvert.SerializeObject(record));
-                            if (maxRecords > 0)
+                            if (_namespace != null)
                             {
-                                count++;
+                                // todo: pool and batch send messages
+                                producer.SendMessageToEventHub(record, partitionKey);
+                            }
+                            else
+                            {
+                                Console.WriteLine(JsonConvert.SerializeObject(record));
                             }
                         }
                     }
                 }
-                    if (maxRecords > 0)
+                if (maxRecords > 0)
                 {
                     count++;
                 }
             }
 
-
         }
 
+
+        // Simple thrift deserializer
         public static T Deserialize<T>(byte[] data) where T : TBase, new()
         {
             T result = new T();
@@ -107,48 +136,23 @@ namespace TeleKinesisNet
             return result;
         }
 
-        private static void PrintBanner(string streamName, string region, float interval)
+        // Simple console banner
+        private static void PrintBanner(string streamName = null, string region = null, float interval = 0F,
+            String _namespace = null, String path = null)
         {
-            string message = $"listening on the '{streamName}' stream in the {region} region at {interval} second intervals";
+            String message;
+            if (_namespace != null)
+            {
+                message = $"sending '{streamName}' AWS Kinesis events from Azure Events Hub {_namespace}/{path}";
+            }
+            else
+            {
+                message = $"listening on the '{streamName}' stream in the {region} region at {interval} second intervals";
+            }
             Console.WriteLine(new String('-', message.Length));
             Console.WriteLine(message);
             Console.WriteLine(new String('-', message.Length));
         }
 
-
-        public class Options
-        {
-            [Option('n', "name", Required = true, HelpText = "The name of Kinesis stream.")]
-            public String name { get; set; }
-
-            [Option('r', "region", Required = true, HelpText = "The AWS Region.")]
-            public String region { get; set; }
-
-            [Option('e', "enriched", Required = false, HelpText = "The results are enriched.")]
-            public bool enriched { get; set; }
-
-            [Value(25, MetaName = "limit", HelpText = "The records per shard limit; default 25, minimum is 2")]
-            public int limit { get; set; }
-
-            [Value(1, MetaName = "interval", HelpText = "The response intervals; default 1 second.")]
-            public float interval { get; set; }
-
-            [Value(0, MetaName = "max", HelpText = "The maximum records to return; default 0 (infinite).")]
-            public int max { get; set; }
-
-        }
-
-        public static void Main(string[] args)
-        {
-
-            CommandLine.Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(opts => ConsumeStream(opts.name, opts.region, opts.enriched, opts.limit, opts.interval));
-                //.WithNotParsed<Options>((errs) => HandleParseError(errs));
-        }
-
-        private static void HandleParseError(IEnumerable<Error> errs)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

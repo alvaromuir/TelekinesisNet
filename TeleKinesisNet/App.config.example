@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <appSettings>
+        <add key="AWSProfileName" value="AWS Default" />
+        <add key="ConnectionString" value ="Set via an environment variable - for example, dev, test, staging, or production connection string." />
+        <add key="AWSProfileName" value="AWS Default" />
+        <add key="AWSAccessKey" value="XXXXXXXXXXXXXXXXXXXX"/>
+        <add key="AWSSecretKey" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="AWSRegion" value="us-east-2"/>
+        <add key="AWSLogging" value="log4net"/>
+        <add key="KinesisStreamName" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="KinesisStreamEnriched" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="KinesisStreamLimit" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="KinesisStreamInterval" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="KinesisStreamMax" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="EventHubsNamespace" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="EventHubsPath" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="EventHubsKey" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <add key="EventHubsSecret" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+    </appSettings>
+    <configSections>
+    <section name="aws" type="AWSSDK.Core, AWSSDK.DynamoDB2, AWSSDK.Kinesis"/>
+  </configSections>
+  <aws region="us-east-2">
+    <logging logTo="Log4Net"/>
+  </aws>
+</configuration>
