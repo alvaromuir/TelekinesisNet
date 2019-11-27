@@ -9,7 +9,8 @@
         <add key="AWSRegion" value="us-east-2"/>
         <add key="AWSLogging" value="log4net"/>
         <add key="KinesisStreamName" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
-        <add key="KinesisStreamEnriched" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+        <!-- leave out for boolean false -->
+        <add key="KinesisStreamIsEnriched" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
         <add key="KinesisStreamLimit" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
         <add key="KinesisStreamInterval" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
         <add key="KinesisStreamMax" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>

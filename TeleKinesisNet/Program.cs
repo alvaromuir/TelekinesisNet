@@ -60,21 +60,26 @@ namespace TeleKinesisNet
             }
             else
             {
+
                 string name = ConfigurationManager.AppSettings["KinesisStreamName"];
                 string region = ConfigurationManager.AppSettings["AWSRegion"];
-                bool enriched = ConfigurationManager.AppSettings["KinesisStreamEnriched"] == null ? false : bool.Parse(ConfigurationManager.AppSettings["KinesisStreamEnriched"]) ;
+                bool enriched = ConfigurationManager.AppSettings["KinesisStreamIsEnriched"] == null? false : bool.Parse(ConfigurationManager.AppSettings["KinesisStreamIsEnriched"]);
                 int limit = Int32.Parse(ConfigurationManager.AppSettings["KinesisStreamLimit"]);
                 float interval = float.Parse(ConfigurationManager.AppSettings["KinesisStreamInterval"]);
-                int max = ConfigurationManager.AppSettings["KinesisStreamMax"] == null ? 0 : Int32.Parse(ConfigurationManager.AppSettings["KinesisStreamMax"]);
+                int max = Int32.Parse(ConfigurationManager.AppSettings["KinesisStreamMax"]);
                 string _namespace = ConfigurationManager.AppSettings["EventHubsNamespace"];
                 string path = ConfigurationManager.AppSettings["EventHubsPath"];
                 string key = ConfigurationManager.AppSettings["EventHubsKey"];
                 string secret = ConfigurationManager.AppSettings["EventHubsSecret"];
 
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.WriteLine($"\nINFO: Reading config from app settings.\n");
+                Console.ResetColor();
+
                 Consumer.ConsumeStream
                 (
-                    name, region, enriched, limit, interval, max, _namespace,
-                    path, key, secret
+                    name, region, enriched, limit, interval, max,
+                    _namespace, path, key, secret
                 );
             }
 
