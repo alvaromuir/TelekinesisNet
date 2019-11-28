@@ -5,11 +5,14 @@
 // ///   11/25/2019
 // ///-----------------------------------------------------------------
 using System;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Amazon;
 using Amazon.Kinesis;
 using Amazon.Kinesis.Model;
+using Amazon.Runtime.CredentialManagement;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Azure.EventHubs;
 using Newtonsoft.Json;
@@ -25,17 +28,27 @@ namespace TeleKinesisNet
         private static EventHubClient eventHubClient;
         private static Producer producer;
         private static String partitionKey;
+        private static AmazonKinesisClient client;
 
         // Kinesis stream consumer. Requires a stream name and region. If the stream is 'snowplow enriched' that is
         // notated by the enriched flag.
         public static void ConsumeStream(string streamName, string region, bool enriched,
             int limit = 25, float interval = 1.0F, int maxRecords = 0,
-            String _namespace = null, String path = null, String key = null, String secret = null)
+            String _namespace = null, String path = null, String key = null, String secret = null,
+            String awsKey = null, String awsSecret = null)
         {
             if (limit < 2) { limit = 2; }
             if (interval < 1) { interval = 1.0F; }
 
-            var client = new AmazonKinesisClient();
+            if(awsKey != null && awsSecret != null)
+            {
+
+                client = new AmazonKinesisClient(awsKey, awsSecret, RegionEndpoint.GetBySystemName(region));
+            }
+            else
+            {
+                client = new AmazonKinesisClient();
+            }
 
             if (_namespace != null)
             {

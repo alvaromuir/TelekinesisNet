@@ -405,3 +405,5 @@ ASALocalRun/
 .localhistory/
 
 App.config
+ValidApp.config
+EnrichedApp.config

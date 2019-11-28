@@ -41,8 +41,13 @@ namespace TeleKinesisNet
             public String key { get; set; }
 
             [Option('s', "secret", Required = false, HelpText = "The Azure Event Hub connection string secret.")]
-            public String secret { get; set; }    
+            public String secret { get; set; }
 
+            [Option('a', "awskey", Required = false, HelpText = "The AWS access key.")]
+            public String awsKey { get; set; }
+
+            [Option('x', "awssecret", Required = false, HelpText = "The AWS secret.")]
+            public String awsSecret { get; set; }
         }
 
         public static void Main(string[] args)
@@ -54,7 +59,8 @@ namespace TeleKinesisNet
                     opts => Consumer.ConsumeStream
                     (
                         opts.name, opts.region, opts.enriched, opts.limit, opts.interval,
-                        opts.max, opts._namespace, opts.path, opts.key, opts.secret
+                        opts.max, opts._namespace, opts.path, opts.key, opts.secret,
+                        opts.awsKey, opts.awsSecret
                     )
                 );
             }
@@ -71,6 +77,8 @@ namespace TeleKinesisNet
                 string path = ConfigurationManager.AppSettings["EventHubsPath"];
                 string key = ConfigurationManager.AppSettings["EventHubsKey"];
                 string secret = ConfigurationManager.AppSettings["EventHubsSecret"];
+                string awsKey = ConfigurationManager.AppSettings["AWSAccessKey"];
+                string awsSecret = ConfigurationManager.AppSettings["AWSSecretKey"];
 
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
                 Console.WriteLine($"\nINFO: Reading config from app settings.\n");
@@ -79,7 +87,7 @@ namespace TeleKinesisNet
                 Consumer.ConsumeStream
                 (
                     name, region, enriched, limit, interval, max,
-                    _namespace, path, key, secret
+                    _namespace, path, key, secret, awsKey, awsSecret
                 );
             }
 

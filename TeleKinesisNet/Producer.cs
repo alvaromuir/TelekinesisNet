@@ -42,7 +42,9 @@ namespace TeleKinesisNet
             try
             {
                 // todo: properly write to logging
-                //Console.WriteLine($"Sending message: {JsonConvert.SerializeObject(record["SequenceNumber"])} - PartitionKey {partitionKey}");
+                #if DEBUG
+                Console.WriteLine($"Sending message: {JsonConvert.SerializeObject(record["SequenceNumber"])} - PartitionKey {partitionKey}");
+                #endif
                 eventHubClient.SendAsync(new EventData(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(record))), partitionKey);
             }
             catch (Exception exception)
