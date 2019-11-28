@@ -4,6 +4,13 @@ Telekinesis is a simple AWS Lambda streaming app focused on [snowplow](https://g
 
 Built in C# .NET Core 3.0
 
+## Deployment to Azure App Service
+Telekinesis can be deployed as a 'WebJob' to Azure. To do so, leverage an App.config with the appropriate settings. An example config has been provided.
+
+## Running
+Telekinsis is intended to run as a console app, and therefore has command line parametes. It can be run from the `$ dotnet run -- [- params]` command or from  
+the build directory.
+
 run `$ <build dir> ./TelekinesisNet`
 
 ```bash
@@ -23,6 +30,8 @@ run `$ <build dir> ./TelekinesisNet`
 
   limit (pos. 25)      The records per shard limit; default 25, minimum is 2
 ```
+
+As aforemntioned, a App.config file will supersede any command line paramters, and a INFO logging message will indicate this.
 
 [Alvaro Muir](mailto:alvaro@coca-cola.com)  
 KO MDS Global Analytics
